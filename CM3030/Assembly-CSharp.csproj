@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\level\CameraTransition.cs" />
+    <Compile Include="Assets\Scripts\level\Door.cs" />
     <Compile Include="Assets\Scripts\level\LevelManager.cs" />
     <Compile Include="Assets\Scripts\level\MapManager.cs" />
   </ItemGroup>

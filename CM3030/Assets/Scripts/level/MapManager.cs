@@ -3,23 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 
+/// Manager of the minimap
 /// </summary>
 public class MapManager : MonoBehaviour
 {
-	public GameObject room;
-	public GameObject door;
+    public GameObject room;
+    public GameObject door;
     public Camera miniCam;
     public Transform minimap;
     public int roomLimit;
 
     int numRooms = 0;
-    Vector3[] directions = { new Vector3(1, 0, 0), new Vector3(0, -1, 0), new Vector3(0, 1, 0), new Vector3(0, -1, 0) };
     List<Vector3> locations = new List<Vector3>();
     List<GameObject> rooms = new List<GameObject>();
     List<GameObject> doors = new List<GameObject>();
     GameObject playerIndicator;
-	
+
     /// <summary>
     /// Start creating the rooms based on the current level.
     /// </summary>
@@ -44,13 +43,12 @@ public class MapManager : MonoBehaviour
     /// <summary>
     /// Spawn the rooms based on current level.
     /// </summary>
-    /// <param name="currentLevel">Current level.</param>
     void GenerateRooms()
     {
         SpawnRooms();
 
-        // reset all rooms if the number of rooms is too low
-        if (numRooms != roomLimit)
+        // reset all rooms if the number of rooms is too low or boss room is beside origin
+        if (numRooms != roomLimit || Vector3.Distance(rooms[roomLimit - 1].transform.position, Vector3.zero) <= 1.1f)
             ResetRooms();
     }
 
@@ -65,12 +63,15 @@ public class MapManager : MonoBehaviour
         playerIndicator.GetComponent<SpriteRenderer>().color = Color.green;
 
         // actually spawn the rooms now
-        //SpawnRandom(Vector3.zero, Vector3.zero);
-        SpawnStraight();
+        //SpawnStraight();
+        SpawnRandom(Vector3.zero, Vector3.zero);
+
+        if (numRooms != roomLimit)
+            return;
 
         // starting rooms is blue
         rooms[0].GetComponent<SpriteRenderer>().color = Color.blue;
-        // bossroom is reed
+        // bossroom is red
         rooms[roomLimit - 1].GetComponent<SpriteRenderer>().color = Color.red;
 
         // center the minimap camera onto the room the player starts from
@@ -104,29 +105,43 @@ public class MapManager : MonoBehaviour
     /// </summary>
     /// <param name="pos">Position of new room.</param>
     /// <param name="doorPos">Position of door to previous room.</param>
+    /// <param name="fromPrev">Door direction leading back to previous room.</param>
     void SpawnRandom(Vector3 pos, Vector3 doorPos)
     {
-        // if room loops back to origin
+        // Prevents loops back to the origin if it's not the first room
         if (numRooms > 0 && pos.Equals(Vector3.zero))
             return;
-        // if room already exists in new location or limit has been reached
-        if (locations.Contains(pos) || numRooms == roomLimit)
+
+        // Stops recursion if the room already exists or if the room limit is reached
+        if (locations.Contains(pos) || numRooms >= roomLimit)
             return;
 
-        // create room and add location to list
+        // Create room and add its location to the list
         rooms.Add(Instantiate(room, pos, Quaternion.identity, minimap));
         locations.Add(pos);
         numRooms++;
 
-        // room not at origin, add door
-        if (pos != Vector3.zero)
+        // If this is not the origin room, create a door connecting it to the previous room
+        if (!pos.Equals(Vector3.zero))
             doors.Add(Instantiate(door, pos - doorPos, Quaternion.identity, minimap));
 
-        // shuffle directions then spawn room there based on chance
-        Shuffle(directions);
-        for (int i = 0; i < 4; i++)
+        // Shuffle directions and attempt to spawn rooms in random directions
+        Shuffle(LevelManager.directions);
+
+        // Loop through shuffled directions
+        for (int i = 0; i < LevelManager.directions.Length; i++)
+        {
+            // Ensure we don't exceed the room limit
+            if (numRooms >= roomLimit)
+                break;
+
+            // Random chance to spawn a room in the current direction
             if (Random.Range(0f, 1f) < 0.25f)
-                SpawnRandom(pos + directions[i], directions[i] / 2);
+            {
+                // Recursively attempt to spawn a room in the chosen direction
+                SpawnRandom(pos + LevelManager.directions[i], LevelManager.directions[i] / 2);
+            }
+        }
     }
 
     /// <summary>
@@ -170,5 +185,15 @@ public class MapManager : MonoBehaviour
     {
         playerIndicator.transform.position = locations[value];
         miniCam.transform.position = locations[value] - new Vector3(0, 0, 10);
+    }
+
+    public List<Vector3> GetDoorLocations()
+    {
+        List<Vector3> doorLocations = new List<Vector3>();
+
+        foreach (GameObject o in doors)
+            doorLocations.Add(o.transform.position);
+
+        return doorLocations;
     }
 }

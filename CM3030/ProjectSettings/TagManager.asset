@@ -13,13 +13,13 @@ TagManager:
   - UI
   - 
   - 
-  - background
-  - middleground
-  - foreground
-  - player
-  - enemy
-  - jumpthrough
-  - map
+  - doorLayer
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
   - 
   - 
   - 
