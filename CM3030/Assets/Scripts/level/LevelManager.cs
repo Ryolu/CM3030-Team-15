@@ -56,6 +56,7 @@ public class LevelManager : MonoBehaviour
         List<Vector3> doorLocations = MM.GetDoorLocations();
         foreach(Vector3 location in doorLocations)
         {
+            List<Door> connectedDoors = new List<Door>();
             for (int i = 0; i < directions.Length; i++)
             {
                 Vector3 dir = directions[i];
@@ -65,9 +66,15 @@ public class LevelManager : MonoBehaviour
                 {
                     StartCoroutine(hit.collider.GetComponent<Door>().TurnOff());
                     foreach (Transform child in hit.collider.transform)
+                    {
                         child.gameObject.SetActive(true);
+                        connectedDoors.Add(hit.collider.GetComponent<Door>());
+                    }
                 }
             }
+
+            foreach(Door door in connectedDoors)
+                door.SetOther(connectedDoors);
         }
     }
 

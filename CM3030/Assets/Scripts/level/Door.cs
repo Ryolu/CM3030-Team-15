@@ -5,17 +5,8 @@ using UnityEngine;
 
 public class Door : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public Transform spawnPoint;
+    public Door otherDoor;
 
     public IEnumerator TurnOff()
     {
@@ -23,5 +14,17 @@ public class Door : MonoBehaviour
         yield return new WaitForSecondsRealtime(1);
         GetComponent<BoxCollider2D>().enabled = true;
         GetComponent<BoxCollider2D>().isTrigger = true;
+    }
+
+    public void SetOther(List<Door> doors)
+    {
+        foreach (Door door in doors)
+            if (door.gameObject != gameObject)
+                otherDoor = door;
+    }
+
+    public Vector3 EnterDoor()
+    {
+        return otherDoor.spawnPoint.position;
     }
 }
