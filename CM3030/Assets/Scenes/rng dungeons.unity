@@ -610,7 +610,6 @@ MonoBehaviour:
   roomDimensions: {x: 18, y: 10, z: 1}
   roomParent: {fileID: 1752668311}
   currentLevel: 1
-  enabler: {fileID: 6928801227715425519, guid: 3c976e7566a82c74ba85cf9aca54c90b, type: 3}
 --- !u!4 &1496833743
 Transform:
   m_ObjectHideFlags: 0
